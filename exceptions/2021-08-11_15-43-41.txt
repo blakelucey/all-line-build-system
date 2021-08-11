@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "./build_master.py", line 130, in main
+    oled_screen.do_oled_screen()
+  File "/home/all-line/build-master/oled_screen.py", line 39, in do_oled_screen
+    if not prog.program():
+  File "/home/all-line/build-master/programmer.py", line 122, in program
+    if target.require_prompt:
+NameError: name 'require_prompt' is not defined

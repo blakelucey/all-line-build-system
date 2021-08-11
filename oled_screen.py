@@ -21,10 +21,10 @@ def do_oled_screen ():
       'Again MAKE SURE this is only connected to 1 pin on the header.\n'
       '\n'
       'Press ENTER when ready, or ESCAPE to cancel.')
+   do_prompt = True
 
    crumb('Program an OLED screen')
 
-   do_prompt = True
    while True:
       prog = programmer.BoardProgrammer()
       prog.add_target('atmega644p',

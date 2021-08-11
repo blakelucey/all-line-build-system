@@ -119,7 +119,7 @@ class BoardProgrammer:
          else:
             message = target.message
 
-         if require_prompt:   
+         if target.require_prompt:   
             result = draw.question(message, choices = choices, default = 0, escape = 1, title = target.title)
          else:
             result = 'Y'
