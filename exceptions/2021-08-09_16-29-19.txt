@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "./build_master.py", line 130, in main
+    oled_screen.do_oled_screen()
+AttributeError: module 'oled_screen' has no attribute 'do_oled_screen'

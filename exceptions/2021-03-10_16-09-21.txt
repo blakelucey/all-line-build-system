@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "./build_master.py", line 119, in main
+    fuel_boss.do_fuel_boss()
+  File "/home/all-line/build-master/fuel_boss.py", line 302, in do_fuel_boss
+    func(fuel_boss_data[ret])
+  File "/home/all-line/build-master/fuel_boss.py", line 24, in <lambda>
+    'func': lambda x: fuel_boss_stable_pi2.build(x),
+  File "/home/all-line/build-master/fuel_boss_stable_pi2.py", line 782, in build
+    if not make_sd_card(data):
+  File "/home/all-line/build-master/fuel_boss_stable_pi2.py", line 341, in make_sd_card
+    set_network(card.root_path, network)
+  File "/home/all-line/build-master/network.py", line 11, in set_network
+    if network['dhcp']:
+KeyError: 'dhcp'

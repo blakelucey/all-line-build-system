@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "./build_master.py", line 116, in main
+    injector.do_injector()
+  File "/home/all-line/build-master/injector.py", line 567, in do_injector
+    show_all_injectors()
+  File "/home/all-line/build-master/injector.py", line 546, in show_all_injectors
+    prog.view()
+  File "/home/all-line/build-master/injector.py", line 262, in view
+    draw.message(('There is no final binary (main.hex) for this system.\n\n',
+  File "/home/all-line/build-master/draw.py", line 172, in message
+    center = center)
+  File "/home/all-line/build-master/draw.py", line 215, in question
+    text = wrap(text, width = wrap_width - 2)
+  File "/home/all-line/build-master/wrap.py", line 8, in wrap
+    split = [' ' if len(line) == 0 else line for line in text.splitlines()]
+AttributeError: 'tuple' object has no attribute 'splitlines'
