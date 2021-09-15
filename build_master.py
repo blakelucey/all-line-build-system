@@ -11,6 +11,9 @@ import gfx_chars
 from logo import all_line_logo
 from curses import wrapper
 
+# Make sure current working directory is the ~/build-master
+os.chdir("/home/all-line/build-master")
+
 # There's only one standard screen and it's global anyhow
 stdscr = None
 

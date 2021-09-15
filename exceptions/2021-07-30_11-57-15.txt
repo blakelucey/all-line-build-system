@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "./build_master.py", line 116, in main
-    injector.do_injector()
-  File "/home/all-line/build-master/injector.py", line 572, in do_injector
-    search_descriptions()
-  File "/home/all-line/build-master/injector.py", line 496, in search_descriptions
-    ret = ret.lower()
-AttributeError: 'NoneType' object has no attribute 'lower'

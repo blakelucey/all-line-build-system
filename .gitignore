@@ -16,3 +16,7 @@
 *.lst
 *.lss
 *.sym
+/staging
+/tmp
+/exceptions
+/compile

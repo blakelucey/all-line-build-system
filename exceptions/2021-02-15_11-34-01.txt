@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "./build_master.py", line 134, in main
-    sd_card.do_dev_card()
-NameError: name 'sd_card' is not defined

@@ -1,0 +1,6 @@
+"filename", "language", "Diff", "comment", "blank", "total"
+"/home/all-line/build-master/buildroot/buildroot-2020.02.9/output/build/php-7.4.13/ext/fileinfo/libmagic.patch", "Diff", 3187, 238, 196, 3621
+"/home/all-line/build-master/buildroot/buildroot-2020.02.9/output/build/php-7.4.13/ext/fileinfo/magicdata.patch", "Diff", 118, 15, 4, 137
+"/home/all-line/build-master/buildroot/buildroot-2020.11.2/output/build/php-7.4.4/ext/fileinfo/libmagic.patch", "Diff", 3187, 238, 196, 3621
+"/home/all-line/build-master/buildroot/buildroot-2020.11.2/output/build/php-7.4.4/ext/fileinfo/magicdata.patch", "Diff", 54, 6, 4, 64
+"Total", "-", 6546, 497, 400, 7443

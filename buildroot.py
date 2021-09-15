@@ -16,7 +16,7 @@ from __main__ import stdscr, crumb, del_crumb
 class BuildrootCompiler:
    def __init__ (self):
       # Use the default Buildroot tree?
-      self.buildroot_root = './buildroot/' + config.get('buildroot_version', 'buildroot-2020.02.9')
+      self.buildroot_root = './buildroot/' + config.get('buildroot_version', 'buildroot-2021.08.13-pi2-tmp')
       self.buildroot_version = self.buildroot_root.split('-')[1]
 
       # Find all of the All-Line versions of buildroot.

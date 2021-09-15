@@ -234,14 +234,24 @@ class SDCardBuilder:
             return False
          rebuild = True
 
-      self.required_files = [
-         f'{self.cache_path}/bcm2709-rpi-2-b.dtb',
-         f'{self.cache_path}/bootcode.bin',
-         f'{self.cache_path}/fixup.dat',
-         f'{self.cache_path}/start.elf',
-         f'{self.cache_path}/zImage',
-         f'{self.cache_path}/rootfs.tar.gz',
-         f'{self.cache_path}/overlays']
+      if 'pi4' in self.cache_path:
+         self.required_files = [
+            f'{self.cache_path}/bcm2711-rpi-4-b.dtb',
+            f'{self.cache_path}/bootcode.bin',
+            f'{self.cache_path}/fixup4.dat',
+            f'{self.cache_path}/start4.elf',
+            f'{self.cache_path}/zImage',
+            f'{self.cache_path}/rootfs.tar.gz',
+            f'{self.cache_path}/overlays']
+      else:
+         self.required_files = [
+            f'{self.cache_path}/bcm2709-rpi-2-b.dtb',
+            f'{self.cache_path}/bootcode.bin',
+            f'{self.cache_path}/fixup.dat',
+            f'{self.cache_path}/start.elf',
+            f'{self.cache_path}/zImage',
+            f'{self.cache_path}/rootfs.tar.gz',
+            f'{self.cache_path}/overlays']
 
       cached_files = [self.cache_path + '/' + fn for fn in os.listdir(self.cache_path)]
       missing = False

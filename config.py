@@ -15,7 +15,7 @@ data = {}
 defaults = {
    'port': '/dev/ttyACM0',
    'sd_card_device': '/dev/mmcblk0',
-   'buildroot_version': 'buildroot-2020.02.9',
+   'buildroot_version': 'buildroot-2021.08.13-pi2-tmp',
    'compiler_threads': 16,
    'compression_threads': 16,
    'verbose': False
