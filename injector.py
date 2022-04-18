@@ -29,8 +29,10 @@ default_fuses = {
 left_col = 22
 predefined = [
    {'name': 'Single Injector', 'model': 'TM-1M1A-RT', 'id': 'single', 'serial': 'A1001576'},
+   {'name': 'Double Injector', 'model': 'TM-1M2A-RT', 'id': 'double', 'serial': 'A1001649'},
    {'name': 'Triple Injector', 'model': 'TM-2M1A1M1A-RT', 'id': 'triple', 'serial': 'A1001635'},
    {'name': 'Brown\'s Oil', 'model': 'TM-2M1A-RTSBDS', 'id': 'browns', 'serial': 'A1001548'},
+   {'name': 'Jugfill Only (2 Lanes)', 'model': 'BP-2A-PRESET', 'id': 'jugfill', 'serial': 'A1001652'},
    #{'name': '4-point Transport', 'model': 'TM-1A4P', 'id': '4pt', 'serial': 'A1001567'},
    #{'name': '5-point Transport', 'model': 'TM-1A5P', 'id': '5pt', 'serial': 'A1001567'},
    #{'name': '6-point Transport', 'model': 'TM-1A6P', 'id': '6pt', 'serial': 'A1001567'},

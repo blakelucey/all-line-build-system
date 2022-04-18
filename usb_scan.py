@@ -25,6 +25,12 @@ def mount_device (dev):
       os.mkdir(mount_dir)
 
    result = subprocess.run(command, shell = True)
+   if (result.returncode == 0):
+      return result.returncode == 0
+   else:
+      # if we fail... try mounting and using the first partition if one exists
+      command = f'sudo mount -t vfat "{dev}1" "{mount_dir}" -o uid=1000,gid=1000,rw,sync > /dev/null'
+      result = subprocess.run(command, shell = True)
    return result.returncode == 0
 
 def unmount_device (dev):
@@ -33,7 +39,7 @@ def unmount_device (dev):
 
    os.system('sync')
 
-   command = f'sudo umount "{dev}" > /dev/null'
+   command = f'sudo umount "{mount_dir}" > /dev/null'
    result = subprocess.run(command, shell = True)
    return result.returncode == 0
 

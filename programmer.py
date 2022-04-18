@@ -69,6 +69,12 @@ class BoardProgrammer:
          fuses = fuses, main_hex = hex_file, eeprom_hex = eeprom_hex,
          can_skip = can_skip, require_prompt = require_prompt, speed = speed, copy_to = copy_to, copy_name = copy_name))
 
+   def try_again (self):
+      result = draw.question('Do you want to try again?', default = 0, escape = 1)
+      if result == 'Y':
+         return True
+      return False
+
    def programmer_check (self):
       while True:
          # Check for the programmer.
@@ -170,43 +176,55 @@ class BoardProgrammer:
       return True
 
    def program_eeprom (self, target):
-      draw.begin_wait(f'Programming target EEPROM ({target.device})...')
-      ret = utils.avrdude_command(
-         target.device, 'eeprom', target.eeprom_hex, run = True, progress = True, speed = target.speed)
-      time.sleep(0.5)
-      draw.end_wait()
-
-      if ret != 0:
-         draw.message(f'Unable to program EEPROM ({target.device}).\n\nCheck your connections.', colors = 10)
-         return False
-
-      return True
-
-   def program_main (self, target):
-      draw.begin_wait(f'Programming target CPU ({target.device})...')
-      ret = utils.avrdude_command(
-         target.device, 'flash', target.hex_file, run = True, progress = True, speed = target.speed)
-      time.sleep(0.5)
-      draw.end_wait()
-
-      if ret != 0:
-         draw.message(f'Unable to program CPU ({target.device}).\n\nCheck your connections.', colors = 10)
-         return False
-
-      return True
-
-   def program_fuses (self, target):
-      for fuse, value in target.fuses.items():
-         draw.begin_wait(f'Programming {fuse.upper()} to {value:02X}...')
+      while True:
+         draw.begin_wait(f'Programming target EEPROM ({target.device})...')
          ret = utils.avrdude_command(
-            target.device, fuse, value, run = True, progress = False)
-         time.sleep(0.25)
+            target.device, 'eeprom', target.eeprom_hex, run = True, progress = True, speed = target.speed)
+         time.sleep(0.5)
          draw.end_wait()
 
          if ret != 0:
-            draw.message(f'Unable to program {fuse.upper()}.\n\nIs the value {value:02X} right?', colors = 10)
-            return False
+            draw.message(f'Unable to program EEPROM ({target.device}).\n\nCheck your connections.', colors = 10)
+            if not (self.try_again()):
+               return False
+         else:
+            return True
 
+   def program_main (self, target):
+      while True:
+         draw.begin_wait(f'Programming target CPU ({target.device})...')
+         ret = utils.avrdude_command(
+            target.device, 'flash', target.hex_file, run = True, progress = True, speed = target.speed)
+         time.sleep(0.5)
+         draw.end_wait()
+
+         if ret != 0:
+            draw.message(f'Unable to program CPU ({target.device}).\n\nCheck your connections.', colors = 10)
+            if not (self.try_again()):
+               return False
+         else:
+            return True
+
+   def program_fuses (self, target):
+      while True:
+         retry = False
+         for fuse, value in target.fuses.items():
+            draw.begin_wait(f'Programming {fuse.upper()} to {value:02X}...')
+            ret = utils.avrdude_command(
+               target.device, fuse, value, run = True, progress = False)
+            time.sleep(0.25)
+            draw.end_wait()
+
+            if ret != 0:
+               draw.message(f'Unable to program {fuse.upper()}.\n\nIs the value {value:02X} right?', colors = 10)
+               if not (self.try_again()):
+                  return False
+               else:
+                  retry = True
+                  break
+         if not retry:
+            break
       return True
+
       
 

@@ -148,7 +148,7 @@ def do_device ():
    for dev in data:
       if dev['hotplug'] == '1' or dev['hotplug'] == True:
          if 'usb' in dev['subsystems']:
-            if dev['model'] is not None and 'sd' in dev['model'].lower():
+            if dev['model'] is not None and any(model in dev['model'].lower() for model in ['sd', 'transcend']):
                devs.append(dev)
 
    sizes = (20, 20, 24, 12)

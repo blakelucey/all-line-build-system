@@ -18,6 +18,8 @@ from text_input import text_input, ip_address_regex
 from menu import menu
 from __main__ import stdscr, crumb, del_crumb
 
+from logger import log_debug
+
 def make_service_file (data, dest):
    cfg = f'{dest}/service.xml'
 
@@ -368,12 +370,15 @@ def make_sd_card (data):
 
 def create_staging_dir (data):
    dest = data['staging_dir']
+   log_debug('creating {}'.format(dest))
    if os.path.exists(dest):
+      log_debug('trashing files in {}'.format(dest))
       # Remove the existing data.
       shutil.rmtree(dest, ignore_errors = True)
       os.mkdir(dest)
       os.mkdir(f'{dest}/firmware')
    else:
+      log_debug('dir DNE: {}'.format(dest))
       os.mkdir(dest)
       os.mkdir(f'{dest}/firmware')
 
@@ -399,13 +404,20 @@ def program_main_board (data):
       defs.remove_define('CAP_HID_CARD_2')
       defs.remove_define('CAP_HID_CARD')
 
-   if data['tank_monitor']:
-      defs.define('CAP_TANK_GAUGES')
-      defs.define('CAP_DFM')
-      defs.remove_define('CAP_DFM_READING')
-   else:
+   if data['tank_monitor'] == 'None':
       defs.remove_define('CAP_TANK_GAUGES')
       defs.remove_define('CAP_DFM')
+      defs.remove_define('CAP_DFM_READING')
+      defs.remove_define('SENSORS_AS_TANKS')
+   elif data['tank_monitor'] == 'Serial':
+      defs.define('CAP_TANK_GAUGES')
+      defs.define('CAP_DFM')
+      defs.remove_define('SENSORS_AS_TANKS')
+      defs.remove_define('CAP_DFM_READING')
+   elif data['tank_monitor'] == 'Sensors':
+      defs.define('CAP_TANK_GAUGES')
+      defs.define('CAP_DFM')
+      defs.define('SENSORS_AS_TANKS')
       defs.remove_define('CAP_DFM_READING')
 
    defs.save()
@@ -533,7 +545,7 @@ def build (info):
       'serial': 'FB100000',
       'num_products': 4,
       'card_reader': 'Magnetic',
-      'tank_monitor': False,
+      'tank_monitor': 'None',
       'wex': False,
       'enterprise': False,
       'testing_account': True,
@@ -625,7 +637,12 @@ def build (info):
             data['card_reader'] = new_reader
 
       elif ret == 'tank_monitor':
-         data['tank_monitor'] = not data['tank_monitor']
+         new_tank = menu([
+            ('No Tank Monitor', 'None'),
+            ('External Tank Board', 'Serial'),
+            ('Sensors as Tank Board', 'Sensors')])
+
+         data['tank_monitor'] = new_tank
 
       elif ret == 'wex':
          data['wex'] = not data['wex']
@@ -791,6 +808,13 @@ def build (info):
                colors = 10, attrs = curses.A_BOLD)
 
       elif ret == 'sd_card':
+         create_staging_dir(data)
+         if not copy_program(data):
+            errors.append('- Unable to copy Pi software to staging directory')
+
+         if not make_config_files(data):
+            errors.append('- Unable to generate Fuel Boss configuration files')
+
          if not make_sd_card(data):
             draw.message('Unable to complete the SD card build process.', colors = 10)
 

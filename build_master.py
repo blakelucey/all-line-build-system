@@ -146,10 +146,12 @@ def main (scr):
          #   draw.message(('I\'m sorry. I can\'t allow you to do that.'), colors = 10)
 
          elif ret == 'quit' or ret == -1:
-            result = draw.question('Are you sure you want to quit?')
+            result = draw.question('Are you sure you want to quit?', escape = 1)
+            #result = draw.question('Are you sure you want to quit?')
             if result == 'Y':
                return
-            return
+            ret = 0
+            continue
       except Exception as e:
          # This catches all exceptions, logs them, and also displays them.
          utils.trace_exception()

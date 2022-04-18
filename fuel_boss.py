@@ -20,7 +20,9 @@ compile_dir = './compile'
 fuel_boss_data = {
    'stable_pi2': {
       'name': 'Fuel-Boss V1 Stable, Pi 2',
-      'dir': f'{fuel_boss_dir}/StableFB-2019-07-08',
+      #'dir': f'{fuel_boss_dir}/StableFB-2019-07-08',
+      #'dir': f'{fuel_boss_dir}/StableFB-2021-05-04-with-receipt-printer',
+      'dir': f'{fuel_boss_dir}/StableFB-2022-01-03',
       'func': lambda x: fuel_boss_stable_pi2.build(x),
       'main_menu': True,
       'staging_dir': staging_dir

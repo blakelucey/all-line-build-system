@@ -25,7 +25,7 @@ def do_repressurizer ():
    crumb('Program a Repressurizer')
 
    prog = programmer.BoardProgrammer()
-   prog.add_target('atmega88',
+   prog.add_target('atmega88p',
       message = message, title = 'Programming',
       fuses = (0x62, 0xD5, 0xFF),
       hex_file = f'{repr_data}/main.hex',
