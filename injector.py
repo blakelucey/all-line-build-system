@@ -15,6 +15,7 @@ from menu import menu, make_columns
 from text_input import text_input
 from __main__ import crumb, del_crumb, stdscr
 
+from logger import log_debug
 # These reference the most common systems we make.
 # If those systems have their software updated, these references may need
 # to change.
@@ -207,8 +208,8 @@ class InjectorProgrammer:
          return False
 
       del_crumb()
-      self.version_path = items[0]
-      return sel
+      self.version_path = sel
+      return True
 
    def select_hex_file (self, files, title):
       # Is there just one file?
