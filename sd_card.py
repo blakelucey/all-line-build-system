@@ -11,6 +11,7 @@ import draw
 import utils
 import config
 from __main__ import stdscr, crumb, del_crumb
+from logger import log_debug
 
 class Partitioner:
    def __init__ (self):
@@ -228,6 +229,8 @@ class SDCardBuilder:
          '\n'
          'Press ENTER to go ahead, or ESCAPE to cancel.')
 
+      log_debug(f'cache path {self.cache_path}')
+
       if not os.path.exists(self.cache_path):
          result = draw.question(message, title = 'Missing Cache', default = 0, escape = 1)
          if result == 'N':
@@ -237,7 +240,7 @@ class SDCardBuilder:
       if 'pi4' in self.cache_path:
          self.required_files = [
             f'{self.cache_path}/bcm2711-rpi-4-b.dtb',
-            f'{self.cache_path}/bootcode.bin',
+            #f'{self.cache_path}/bootcode.bin',
             f'{self.cache_path}/fixup4.dat',
             f'{self.cache_path}/start4.elf',
             f'{self.cache_path}/zImage',
@@ -253,10 +256,13 @@ class SDCardBuilder:
             f'{self.cache_path}/rootfs.tar.gz',
             f'{self.cache_path}/overlays']
 
+      log_debug(f'required files {self.required_files}')
+
       cached_files = [self.cache_path + '/' + fn for fn in os.listdir(self.cache_path)]
       missing = False
       for required in self.required_files:
          if required not in cached_files:
+            log_debug(f'MISSING FILE: {required}')
             missing = True
 
       if missing:

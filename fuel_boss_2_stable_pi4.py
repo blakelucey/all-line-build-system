@@ -20,232 +20,180 @@ from __main__ import stdscr, crumb, del_crumb
 
 from logger import log_debug
 
-def make_service_file (data, dest):
-   cfg = f'{dest}/service.xml'
+def make_options_file (data, dest):
+   options = {
+      "owner": data['owner'],
+      "address": data['location'],
+      "address_2": "",
+      "name": data['nickname'],
+      "record_all_flow": False,
+      "unit": data['unit'] == 'Liters',
+      "keypad_password": 0,
+      "schedule_enabled": False,
+      "brightness": 50,
+      "input_timeout": 120,
+      "screensaver_timeout": 360,
+      "days": [
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         },
+         {
+            "open": True,
+            "begins": "00:00",
+            "ends": "00:00",
+            "all_day": True
+         }
+      ]
+   }
+   with open(f'{dest}/options.json', "w") as outfile:
+      json.dump(options, outfile)
+   return True
 
-   root = xml.Element('service')
-   utils.add_child(root, 'serial-number', data['serial'])
-   utils.add_child(root, 'number-of-products', data['num_products'])
-
-   act = utils.add_child(root, 'activation')
-   utils.add_child(act, 'state', 'activated')
-   utils.add_child(act, 'expires-on', 'never')
-   utils.add_child(act, 'warn-on-use', 'false')
-
-   rep = utils.add_child(root, 'reporting')
-   utils.add_child(rep, 'active', 'false')
-   utils.add_child(rep, 'report-to', 'http://www.fuel-boss.com/reporting/')
-   utils.add_child(rep, 'attach-transactions', 'true')
-
-   return utils.save_xml(root, cfg)
-
-def make_system_file (data, dest):
-   cfg = f'{dest}/system.xml'
-
-   root = xml.Element('config')
-   utils.add_child(root, 'owner', data['owner'])
-   utils.add_child(root, 'location', data['location'])
-   utils.add_child(root, 'name', data['nickname'])
-   utils.add_child(root, 'mode', 'regular')
-   utils.add_child(root, 'master-address', '127.0.0.1')
-   utils.add_child(root, 'unit', data['unit'].lower())
-   utils.add_child(root, 'password', '0' if data['keypad'] == 'None' else data['keypad'])
-   utils.add_child(root, 'brightness', '15')
-   utils.add_child(root, 'authentication-type', 'keypad')
-
-   to = utils.add_child(root, 'timeouts')
-   utils.add_child(to, 'input', '120')
-   utils.add_child(to, 'screensaver', '300')
-
-   sched = utils.add_child(root, 'schedule', attrs = {'enabled': 'false'})
-   utils.add_child(sched, 'day-begins', '08:00')
-   utils.add_child(sched, 'day-ends', '17:00')
-
-   store = utils.add_child(root, 'storage')
-   utils.add_child(store, 'required', 'true')
-   utils.add_child(store, 'sync-to-cloud', 'false')
-
-   return utils.save_xml(root, cfg)
+def make_system_options_file (data, dest):
+   system_options = {
+      "serial": data['serial'],
+      "activated": True,
+      "expires_on": None,
+      "warn": False,
+      "num_products": data['num_products'],
+      "capabilities": []
+   }
+   with open(f'{dest}/system_options.json', "w") as outfile:
+      json.dump(system_options, outfile)
+   return True
 
 def make_accounts_file (data, dest):
-   cfg = f'{dest}/accounts.xml'
-   perms = ','.join([str(n) for n in range(int(data['num_products']))])
-
-   root = xml.Element('groups')
-
-   group = utils.add_child(root, 'group', attrs = {
-      'enabled': 'true', 'id': '1', 'name': 'All-Line Equipment'})
-   utils.add_child(group, 'permissions', perms)
-
-   accounts = utils.add_child(group, 'accounts')
-   account = utils.add_child(accounts, 'account', attrs = {
-      'enabled': 'true', 'id': '1234', 'locked': 'false', 'name': 'Testing Account'})
-
-   utils.add_child(account, 'pin', 'none')
-   utils.add_child(account, 'permissions', perms)
-   utils.add_child(account, 'limit', '0.0')
-
-   auth = utils.add_child(account, 'authentication')
-   utils.add_child(auth, 'card')
-
-   return utils.save_xml(root, cfg)
-
-def make_products_file (data, dest):
-   cfg = f'{dest}/products.xml'
-
-   root = xml.Element('products')
-
-   for pid in range(int(data['num_products'])):
-      prod = utils.add_child(root, 'product', attrs = {
-         'id': f'{pid + 1}', 'name': f'Product {pid + 1}', 'enabled': 'true'})
-
-      utils.add_child(prod, 'pulses-per-unit', '10.0')
-      utils.add_child(prod, 'price', '$0.0')
-
-      to = utils.add_child(prod, 'timeouts')
-      utils.add_child(to, 'authorized', f'{60 * 2}')
-      utils.add_child(to, 'first-pulse', '60')
-      utils.add_child(to, 'missing-pulse', f'{60 * 2}')
-
-   return utils.save_xml(root, cfg)
-
-def make_prompts_file (data, dest):
-   cfg = f'{dest}/prompts.xml'
-   root = xml.Element('prompts')
-   return utils.save_xml(root, cfg)
+   if data['testing_account']:
+      accounts = {
+         "groups": [
+            {
+               "id": "07049fbd7af765a3",
+               "enabled": True,
+               "permissions": [1, 2, 3, 4, 5, 6, 7, 8],
+               "name": "All-Line"
+            }
+         ],
+         "accounts": [
+            {
+               "id": "6144",
+               "group_id": "07049fbd7af765a3",
+               "enabled": True,
+               "locked": False,
+               "pin": False,
+               "permissions": [1, 2, 3, 4, 5, 6, 7, 8],
+               "card_data": "",
+               "auto_assign": False,
+               "limit": "0",
+               "name": "Testing Account"
+            }
+         ]
+      }
+      with open(f'{dest}/accounts.json', "w") as outfile:
+         json.dump(accounts, outfile)
+   perms = ','.join([str(n+1) for n in range(int(data['num_products']))])
+   log_debug(f'PERMS {perms}')
+   return True
 
 def make_tanks_file (data, dest):
-   # Set up reporting parameters if we're building an Enterprise system.
-   if data['enterprise']:
-      reporting = {
-         'hide': False,
-         'enabled': False,
-         'host': 'data.telapoint.com',
-         'port': 21,
-         'directory': 'IDSData',
-         'site_id': '0000',
-         'account_id': '100453',
-         'interval': 720,
-         'username': 'Enterprise_100453',
-         'password': 'e27365ztat'
-      }
-   else:
-      reporting = {
-         'hide': True,
-         'enabled': False,
-         'host': '',
-         'port': 21,
-         'directory': '',
-         'site_id': '',
-         'account_id': '',
-         'interval': 720,
-         'username': '',
-         'password': ''
-      }
-
-   # Generate triggers.
-   triggers = [{
-      'enabled': False,
-      'level': 0,
-      'direction': 0,
-      'send_on_trigger': False,
-      'send_on_no_trigger': False,
-      'text': '',
-      'log': True
-   }]
-
-   triggers *= 3
-
-   # Generate the tank gauge inputs.
-   tanks = []
-   for tid in range(8):
+   tanks = {
+      "emulation": data['tls_emu'],
+      "poll_period": "3.0",
+      "history_period": "60.0",
+      "relax_time": "120.0",
+      "required_change": "20.0",
+      "tanks": []
+   }
+   for i in range(8):
       tank = {
-         'id': tid,
-         'enabled': False,
-         'name': f'Tank {tid + 1}',
-         'alt_name': '',
-         'shape': 0,
-         'width': 24.0,
-         'height': 24.0,
-         'depth': 24.0,
-         'diameter': 0.0,
-         'probe_type': 0,
-         'offset': 0.0,
-         'low_level': 0.0,
-         'low_level_product_id': 0,
-         'triggers': triggers
+         "present": (i < int(data['num_tanks'])),
+         "name": f"Tank {i+1}",
+         "channel_id": i,
+         "offset": "0",
+         "shape": "box",
+         "dimensions": {
+            "width": 50.0,
+            "height": 50.0,
+            "depth": 50.0,
+            "diameter": 0.0
+         },
+         "max_level": "0",
+         "probe_type": "active",
+         "enabled": False,
+         "low_level": "0",
+         "match_products": [],
+         "triggers": []
       }
+      tanks['tanks'].append(tank)
 
-      tanks.append(tank)
+   with open(f'{dest}/tanks.json', "w") as outfile:
+      json.dump(tanks, outfile)
 
-   tank_config = {
-      'mode': 'internal',
-      'tls350_emulation': True,
-      'delivery_detection': {
-         'required_change': 2,
-         'relax_time': 30
-      },
-      'internal_update_interval': 1,
-      'external_update_interval': 60,
-      'max_level': 95,
-      'tank_monitor': {
-         'host': '0.0.0.0',
-         'port': 80
-      },
-      'reporting': reporting,
-      'tanks': tanks
+   return True
+
+def make_manager_file (data, dest):
+   managers = {
+      "users": [
+         {
+               "real_name": "All-Line Equipment",
+               "username": "all-line",
+               "enabled": True,
+               "permissions": {
+                  "web": "super admin",
+                  "groups": []
+               },
+               "last_activity": 0,
+               "last_ip": "",
+               "password_hash": "bcdde72f8ffad157876b170249033f34e83b55b7"
+         },
+         {
+               "real_name": "User",
+               "username": data['admin'],
+               "enabled": True,
+               "permissions": {
+                  "web": "super admin",
+                  "groups": []
+               },
+               "last_activity": 0,
+               "last_ip": "",
+               "password_hash": hashlib.sha1(data['password'].encode('ascii')).hexdigest()
+         }
+      ]
    }
-
-   cfg = f'{dest}/tanks.cfg'
-   with open(cfg, 'w') as f:
-      f.write(json.dumps(tank_config, indent = 3))
-
-   return True
-
-def make_deliveries_file (data, dest):
-   cfg = f'{dest}/deliveries.cfg'
-   with open(cfg, 'w') as f:
-      f.write('')
-      f.flush()
-
-   return True
-
-def make_smtp_file (data, dest):
-   cfg = f'{dest}/smtp.cfg'
-
-   smtp = {
-      'server': 'smtp.gmail.com',
-      'port': 587,
-      'username': 'notifier@equipment-notifications.com',
-      'password': 'thisisaverycomplexpassword'
-   }
-   
-   with open(cfg, 'w') as f:
-      f.write(json.dumps(smtp, indent = 3))
-
-   return True
-
-def make_web_user_file (data, dest):
-   cfg = f'{dest}/web-users.cfg'
-   hash = hashlib.sha1(data['password'].encode('ascii')).hexdigest()
-
-   users = [
-      {
-         'real_name': 'All-Line Equipment',
-         'username': 'all-line',
-         'password_hash': 'bcdde72f8ffad157876b170249033f34e83b55b7',
-         'permissions': ['update', 'admin']
-      },
-      {
-         'real_name': 'User',
-         'username': data['admin'],
-         'password_hash': hash,
-         'permissions': ['admin']
-      }
-   ]
-
-   with open(cfg, 'w') as f:
-      f.write(json.dumps(users, indent = 3))
+   with open(f'{dest}/managers.json', "w") as outfile:
+      json.dump(managers, outfile)
 
    return True
 
@@ -264,31 +212,19 @@ def make_config_files (data):
 
    errors = []
 
-   if not make_service_file(data, dest):
-      errors.append('service file')
+   if not make_options_file(data, dest):
+      errors.append('options file')
 
-   if not make_system_file(data, dest):
+   if not make_system_options_file(data, dest):
       errors.append('system configuration file')
 
    if not make_accounts_file(data, dest):
       errors.append('accounts file')
 
-   if not make_products_file(data, dest):
-      errors.append('products file')
-
-   if not make_prompts_file(data, dest):
-      errors.append('prompts file')
-
    if not make_tanks_file(data, dest):
       errors.append('tanks file')
 
-   if not make_deliveries_file(data, dest):
-      errors.append('empty deliveries file')
-
-   if not make_smtp_file(data, dest):
-      errors.append('SMTP file')
-
-   if not make_web_user_file(data, dest):
+   if not make_manager_file(data, dest):
       errors.append('web interface users file')
 
    if len(errors):
@@ -302,7 +238,7 @@ def make_config_files (data):
    return True
 
 def make_sd_card (data):
-   card = sd_card.SDCardBuilder()
+   card = sd_card.SDCardBuilder('buildroot-fb-TNG', 'all_line_pi4')
    if not card.build():
       return False
 
@@ -313,6 +249,7 @@ def make_sd_card (data):
    # Copy the program data.
    try:
       utils.copy_tree(data['staging_dir'], card.prog_path)
+      utils.copy_tree(f"{data['staging_dir']}/config/", card.conf_path)
    except (IOError, OSError, PermissionError, FileNotFoundError) as e:
       draw.message((f'Unable to copy Fuel Boss software to {card.prog_path}.\n'
          '\n'
@@ -340,7 +277,10 @@ def make_sd_card (data):
       'dns': data['dns']
    }
 
-   set_network(card.root_path, network)
+   set_network(card.root_path, network, card.conf_path)
+
+   # Last thing we're going to do is disable the reverse ssh startup script which originated inside rootfs.tar.gz
+   os.system(f'sudo chmod -R 644 {card.root_path}/etc/init.d/S90rssh')
 
    # Unmount everything.
    if not card.cleanup():
@@ -386,7 +326,7 @@ def program_main_board (data):
    # The mainboard code changes depending on selected features.
    # These are stored in inc/features.h
    # We'll use the DefinitionEditor to modify these.
-   comp = compiler.Compiler(f'{data["dir"]}/new_fb_io_controller')
+   comp = compiler.Compiler(f'{data["dir"]}/io_controller')
    dest = comp.get_path()
    defs = compiler.DefinitionEditor(f'{dest}/inc/features.h')
 
@@ -492,7 +432,7 @@ def program_dfm_board (data):
       message = message,
       title = 'Program Tank Gauge/DFM Board',
       fuses = (0xFF, 0xD0, 0xFC),
-      hex_file = f'{data["dir"]}/new_dfm_controller/main.hex',
+      hex_file = f'{data["dir"]}/dfm/main.hex',
       can_skip = True,
       speed = 16,
       copy_to = f'{data["staging_dir"]}/firmware',
@@ -508,7 +448,7 @@ def copy_program (data):
    # directory, ignoring files we don't want.
 
    draw.begin_output(title = 'Copying Files', rows = 24, cols = 130)
-   src = f'{data["dir"]}/arm'
+   src = f'{data["dir"]}/raspberry_pi'
    dest = data["staging_dir"]
    ignore = [
       '*.pyc', '*.bat', 'finalize.sh', 'integrated_finalize.sh',
@@ -533,21 +473,23 @@ def copy_program (data):
    return True
 
 def build (info):
-   crumb('Stable, Pi 2')
+   crumb('Stable, FB2.0 on Pi 4')
 
    data = {
       # Data about where things are
       'staging_dir': info['staging_dir'],
       'dir': info['dir'],
-      'buildroot_version': 'pi2',
+      'buildroot_version': 'pi4',
 
       # Data about the Fuel Boss
       'serial': 'FB100000',
       'num_products': 4,
       'card_reader': 'Magnetic',
       'tank_monitor': 'None',
-      'wex': False,
-      'enterprise': False,
+      'num_tanks': '0',
+      'tls_emu': False,
+      #'wex': False,
+      #'enterprise': False,
       'testing_account': True,
       'owner': '',
       'location': '',
@@ -571,8 +513,10 @@ def build (info):
          (f'Number of Products      {data["num_products"]}', 'num_products'),
          (f'Card Reader             {data["card_reader"]}', 'card_reader'),
          (f'Tank Monitor Board      {data["tank_monitor"]}', 'tank_monitor'),
-         (f'Report to WEX?          {data["wex"]}', 'wex'),
-         (f'Enterprise\'s WEX?      {data["enterprise"]}', 'enterprise'),
+         (f'Number of Tanks         {data["num_tanks"]}', 'num_tanks'),
+         (f'Do TLS Emulation?       {data["tls_emu"]}', 'tls_emu'),
+         #(f'Report to WEX?          {data["wex"]}', 'wex'),
+         #(f'Enterprise\'s WEX?      {data["enterprise"]}', 'enterprise'),
          (f'Enable Test Account     {data["testing_account"]}', 'testing_account'),
          (f'System Owner            {data["owner"] if len(data["owner"]) else "(not yet set)"}', 'owner'),
          (f'Location                {data["location"] if len(data["location"]) else "(not yet set)"}', 'location'),
@@ -605,7 +549,7 @@ def build (info):
          (f'I\'m done setting this up. Proceed to build the whole unit.', 'done'),
          (f'I\'m done setting this up. Only build an SD card.', 'sd_card')]
 
-      ret = menu(items, title = 'Standard V1 Fuel Boss Configuration, Pi 2', pre_select = ret)
+      ret = menu(items, title = 'Standard Fuel Boss 2.0 Configuration, Pi 4', pre_select = ret)
 
       if ret == 'serial':
          new_serial = text_input(
@@ -644,11 +588,24 @@ def build (info):
 
          data['tank_monitor'] = new_tank
 
+      elif ret == 'num_tanks':
+         num_tanks = text_input(
+            data['num_tanks'],
+            prompt = 'Enter a the numebr of tanks this sytem will use:',
+            max_len = 1,
+            force_width = 40,
+            match = '^[0-8]')
+         if num_tanks is not None and len(num_tanks):
+            data['num_tanks'] = num_tanks
+
       elif ret == 'wex':
          data['wex'] = not data['wex']
 
       elif ret == 'enterprise':
          data['enterprise'] = not data['enterprise']
+
+      elif ret == 'tls_emu':
+         data['tls_emu'] = not data['tls_emu']
 
       elif ret == 'testing_account':
          data['testing_account'] = not data['testing_account']

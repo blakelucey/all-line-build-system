@@ -1,7 +1,7 @@
 import os
 import sys
 
-def set_network (root_path, network):
+def set_network (root_path, network, conf_path = None):
    # Write a network configuration file.
 
    text = ('auto lo\n'
@@ -16,13 +16,19 @@ def set_network (root_path, network):
          f'netmask {network["netmask"]}\n'
          f'gateway {network["gateway"]}\n')
 
-   out = os.path.join(root_path, 'etc', 'network', 'interfaces')
+   if conf_path is None:
+      out = os.path.join(root_path, 'etc', 'network', 'interfaces')
+   else:
+      out = os.path.join(conf_path, 'network')
 
    with open(out, 'w') as f:
       f.write(text)
 
    # Now the DNS.
-   out = os.path.join(root_path, 'etc', 'resolv.conf')
+   if conf_path is None:
+      out = os.path.join(root_path, 'etc', 'resolv.conf')
+   else:
+      out = os.path.join(conf_path, 'dns')
 
    with open(out, 'w') as f:
       f.write(f'nameserver {network["dns"]}')

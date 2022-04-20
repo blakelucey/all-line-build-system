@@ -12,6 +12,7 @@ from __main__ import crumb, del_crumb, stdscr
 
 from fuel_boss_custom import *
 import fuel_boss_stable_pi2
+import fuel_boss_2_stable_pi4
 
 fuel_boss_dir = './data/fuel_boss'
 staging_dir = './staging'
@@ -28,9 +29,9 @@ fuel_boss_data = {
       'staging_dir': staging_dir
    },
    'unstable_pi4': {
-      'name': 'Fuel-Boss V2 Unstable, Pi 4',
-      'dir': 'TNG',
-      'func': None,
+      'name': 'Fuel-Boss 2.0, Pi 4',
+      'dir': f'{fuel_boss_dir}/FuelBossTNG',
+      'func': lambda x: fuel_boss_2_stable_pi4.build(x),
       'main_menu': True,
       'staging_dir': staging_dir
    },
