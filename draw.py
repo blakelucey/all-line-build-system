@@ -2,6 +2,7 @@ import time
 import curses
 import gfx_chars
 import subprocess
+from logger import log_debug
 from wrap import wrap
 from __main__ import stdscr, crumb, del_crumb
 
@@ -34,9 +35,17 @@ def newwin (
 
    # Center this window?
    if row is None:
-      row = curses.LINES // 2 - rows // 2 - 1
+      if rows > curses.LINES:
+         rows = curses.LINES-2
+         row = 1
+      else:
+         row = curses.LINES // 2 - rows // 2 - 1
    if col is None:
-      col = curses.COLS // 2 - cols // 2 - 1
+      if cols > curses.COLS:
+         cols = curses.COLS-2
+         col = 1
+      else:
+         col = curses.COLS // 2 - cols // 2 - 1
 
    if subwin:
       win = stdscr.subwin(rows, cols, row, col)

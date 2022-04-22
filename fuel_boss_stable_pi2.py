@@ -642,7 +642,8 @@ def build (info):
             ('External Tank Board', 'Serial'),
             ('Sensors as Tank Board', 'Sensors')])
 
-         data['tank_monitor'] = new_tank
+         if new_tank != -1:
+            data['tank_monitor'] = new_tank
 
       elif ret == 'wex':
          data['wex'] = not data['wex']

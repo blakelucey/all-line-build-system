@@ -20,6 +20,20 @@ from __main__ import stdscr, crumb, del_crumb
 
 from logger import log_debug
 
+def make_display_file (data, dest):
+   display = {
+      "scale": not data['full_screen'],
+      "scale_x": 140,
+      "scale_y": 103,
+      "scale_width": 530,
+      "scale_height": 279,
+      "device": "/dev/fb0",
+      "driver": "fbcon"
+   }
+   with open(f'{dest}/display.json', "w") as outfile:
+      json.dump(display, outfile)
+   return True
+
 def make_options_file (data, dest):
    options = {
       "owner": data['owner'],
@@ -211,6 +225,9 @@ def make_config_files (data):
       return False
 
    errors = []
+
+   if not make_display_file(data, dest):
+      errors.append('display file')
 
    if not make_options_file(data, dest):
       errors.append('options file')
@@ -488,6 +505,7 @@ def build (info):
       'tank_monitor': 'None',
       'num_tanks': '0',
       'tls_emu': False,
+      'full_screen': False,
       #'wex': False,
       #'enterprise': False,
       'testing_account': True,
@@ -515,6 +533,7 @@ def build (info):
          (f'Tank Monitor Board      {data["tank_monitor"]}', 'tank_monitor'),
          (f'Number of Tanks         {data["num_tanks"]}', 'num_tanks'),
          (f'Do TLS Emulation?       {data["tls_emu"]}', 'tls_emu'),
+         (f'Full Screen             {data["full_screen"]}', 'full_screen'),
          #(f'Report to WEX?          {data["wex"]}', 'wex'),
          #(f'Enterprise\'s WEX?      {data["enterprise"]}', 'enterprise'),
          (f'Enable Test Account     {data["testing_account"]}', 'testing_account'),
@@ -586,7 +605,8 @@ def build (info):
             ('External Tank Board', 'Serial'),
             ('Sensors as Tank Board', 'Sensors')])
 
-         data['tank_monitor'] = new_tank
+         if new_tank != -1:
+            data['tank_monitor'] = new_tank
 
       elif ret == 'num_tanks':
          num_tanks = text_input(
@@ -606,6 +626,9 @@ def build (info):
 
       elif ret == 'tls_emu':
          data['tls_emu'] = not data['tls_emu']
+
+      elif ret == 'full_screen':
+         data['full_screen'] = not data['full_screen']
 
       elif ret == 'testing_account':
          data['testing_account'] = not data['testing_account']
