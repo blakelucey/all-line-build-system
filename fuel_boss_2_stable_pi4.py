@@ -490,7 +490,7 @@ def copy_program (data):
    return True
 
 def build (info):
-   crumb('Stable, FB2.0 on Pi 4')
+   crumb(info['name'])
 
    data = {
       # Data about where things are
@@ -535,7 +535,7 @@ def build (info):
          (f'Do TLS Emulation?       {data["tls_emu"]}', 'tls_emu'),
          (f'Full Screen             {data["full_screen"]}', 'full_screen'),
          #(f'Report to WEX?          {data["wex"]}', 'wex'),
-         #(f'Enterprise\'s WEX?      {data["enterprise"]}', 'enterprise'),
+         #(f'Enterprise\'s WEX?       {data["enterprise"]}', 'enterprise'),
          (f'Enable Test Account     {data["testing_account"]}', 'testing_account'),
          (f'System Owner            {data["owner"] if len(data["owner"]) else "(not yet set)"}', 'owner'),
          (f'Location                {data["location"] if len(data["location"]) else "(not yet set)"}', 'location'),

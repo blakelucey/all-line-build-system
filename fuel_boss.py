@@ -26,13 +26,31 @@ fuel_boss_data = {
       'dir': f'{fuel_boss_dir}/StableFB-2022-01-03',
       'func': lambda x: fuel_boss_stable_pi2.build(x),
       'main_menu': True,
+      'portal': False,
       'staging_dir': staging_dir
    },
-   'unstable_pi4': {
+   'fb_2_stable_pi4': {
       'name': 'Fuel-Boss 2.0, Pi 4',
       'dir': f'{fuel_boss_dir}/FuelBossTNG',
       'func': lambda x: fuel_boss_2_stable_pi4.build(x),
       'main_menu': True,
+      'portal': False,
+      'staging_dir': staging_dir
+   },
+   'master_slave_pi2': {
+      'name': 'Master Slave System, Pi 2',
+      'dir': f'{fuel_boss_dir}/MasterSlaveFB-2021-08-20',
+      'func': lambda x: fuel_boss_stable_pi2.build(x),
+      'main_menu': True,
+      'portal': False,
+      'staging_dir': staging_dir
+   },
+   'portal_pi2': {
+      'name': 'Portal Fuel-Boss, Pi 2',
+      'dir': f'{fuel_boss_dir}/StableFB-with-portal',
+      'func': lambda x: fuel_boss_stable_pi2.build(x),
+      'main_menu': True,
+      'portal': True,
       'staging_dir': staging_dir
    },
    'road_ranger_rock_island': {

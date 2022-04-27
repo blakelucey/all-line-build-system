@@ -19,6 +19,9 @@ from menu import menu
 from __main__ import stdscr, crumb, del_crumb
 
 from logger import log_debug
+import traceback
+
+# I dislike this portal checking bloat but I don't have the time to fix it...
 
 def make_service_file (data, dest):
    cfg = f'{dest}/service.xml'
@@ -32,10 +35,11 @@ def make_service_file (data, dest):
    utils.add_child(act, 'expires-on', 'never')
    utils.add_child(act, 'warn-on-use', 'false')
 
-   rep = utils.add_child(root, 'reporting')
-   utils.add_child(rep, 'active', 'false')
-   utils.add_child(rep, 'report-to', 'http://www.fuel-boss.com/reporting/')
-   utils.add_child(rep, 'attach-transactions', 'true')
+   if not data['portal']:
+      rep = utils.add_child(root, 'reporting')
+      utils.add_child(rep, 'active', 'false')
+      utils.add_child(rep, 'report-to', 'http://www.fuel-boss.com/reporting/')
+      utils.add_child(rep, 'attach-transactions', 'true')
 
    return utils.save_xml(root, cfg)
 
@@ -46,8 +50,16 @@ def make_system_file (data, dest):
    utils.add_child(root, 'owner', data['owner'])
    utils.add_child(root, 'location', data['location'])
    utils.add_child(root, 'name', data['nickname'])
-   utils.add_child(root, 'mode', 'regular')
-   utils.add_child(root, 'master-address', '127.0.0.1')
+   if not data['portal']:
+      utils.add_child(root, 'mode', 'regular')
+      utils.add_child(root, 'master-address', '127.0.0.1')
+   else:
+      utils.add_child(root, 'allow-authorize-all', 'false')
+      utils.add_child(root, 'mode', 'managed')
+      utils.add_child(root, 'record-all-flow', 'false')
+      utils.add_child(root, 'master-address')
+      utils.add_child(root, 'email-to')
+
    utils.add_child(root, 'unit', data['unit'].lower())
    utils.add_child(root, 'password', '0' if data['keypad'] == 'None' else data['keypad'])
    utils.add_child(root, 'brightness', '15')
@@ -61,28 +73,40 @@ def make_system_file (data, dest):
    utils.add_child(sched, 'day-begins', '08:00')
    utils.add_child(sched, 'day-ends', '17:00')
 
-   store = utils.add_child(root, 'storage')
-   utils.add_child(store, 'required', 'true')
-   utils.add_child(store, 'sync-to-cloud', 'false')
+   if not data['portal']:
+      store = utils.add_child(root, 'storage')
+      utils.add_child(store, 'required', 'true')
+      utils.add_child(store, 'sync-to-cloud', 'false')
+   else:
+      cm = utils.add_child(root, 'card-matching')
+      utils.add_child(cm, 'prefix')
+      utils.add_child(cm, 'id-position')
+      utils.add_child(cm, 'id-length')
+
 
    return utils.save_xml(root, cfg)
 
 def make_accounts_file (data, dest):
    cfg = f'{dest}/accounts.xml'
-   perms = ','.join([str(n) for n in range(int(data['num_products']))])
+   perms = ','.join([str(n+1) for n in range(int(data['num_products']))])
 
    root = xml.Element('groups')
 
    group = utils.add_child(root, 'group', attrs = {
       'enabled': 'true', 'id': '1', 'name': 'All-Line Equipment'})
-   utils.add_child(group, 'permissions', perms)
+   if not data['portal']: utils.add_child(group, 'permissions', perms)
 
    accounts = utils.add_child(group, 'accounts')
-   account = utils.add_child(accounts, 'account', attrs = {
+   if not data['portal']:
+      account = utils.add_child(accounts, 'account', attrs = {
       'enabled': 'true', 'id': '1234', 'locked': 'false', 'name': 'Testing Account'})
+   else:
+      account = utils.add_child(accounts, 'account', attrs = {
+      'enabled': 'true', 'id': '1234', 'name': 'Testing Account'})
+      utils.add_child(account, 'locked', 'false')
 
    utils.add_child(account, 'pin', 'none')
-   utils.add_child(account, 'permissions', perms)
+   if not data['portal']: utils.add_child(account, 'permissions', perms)
    utils.add_child(account, 'limit', '0.0')
 
    auth = utils.add_child(account, 'authentication')
@@ -100,7 +124,9 @@ def make_products_file (data, dest):
          'id': f'{pid + 1}', 'name': f'Product {pid + 1}', 'enabled': 'true'})
 
       utils.add_child(prod, 'pulses-per-unit', '10.0')
-      utils.add_child(prod, 'price', '$0.0')
+      # I don't know if this matters but the portal FB products.xml does not include the $...
+      if not data['portal']: utils.add_child(prod, 'price', '$0.0')
+      else: utils.add_child(prod, 'price', '0.0')
 
       to = utils.add_child(prod, 'timeouts')
       utils.add_child(to, 'authorized', f'{60 * 2}')
@@ -112,6 +138,7 @@ def make_products_file (data, dest):
 def make_prompts_file (data, dest):
    cfg = f'{dest}/prompts.xml'
    root = xml.Element('prompts')
+   if data['portal']: utils.add_child(root, 'prompt-fields', '')
    return utils.save_xml(root, cfg)
 
 def make_tanks_file (data, dest):
@@ -212,18 +239,116 @@ def make_deliveries_file (data, dest):
 
 def make_smtp_file (data, dest):
    cfg = f'{dest}/smtp.cfg'
-
-   smtp = {
-      'server': 'smtp.gmail.com',
-      'port': 587,
-      'username': 'notifier@equipment-notifications.com',
-      'password': 'thisisaverycomplexpassword'
-   }
+   if data['portal']:
+      smtp = {
+         'smtp': {
+            'all_line_smtp': True,
+            'server': 'smtp.gmail.com',
+            'port': 587,
+            'username': 'notifier@equipment-notifications.com',
+            'password': 'thisisaverycomplexpassword'
+         }
+      }
+   else:
+      smtp = {
+         'server': 'smtp.gmail.com',
+         'port': 587,
+         'username': 'notifier@equipment-notifications.com',
+         'password': 'thisisaverycomplexpassword'
+      }
    
    with open(cfg, 'w') as f:
       f.write(json.dumps(smtp, indent = 3))
 
    return True
+
+def make_xml_tanks_file (data, dest):
+   cfg = f'{dest}/tanks.xml'
+
+   root = xml.Element('tank-configuration')
+   utils.add_child(root, 'mode', 'internal')
+   utils.add_child(root, 'tls350-emulation', 'true')
+   utils.add_child(root, 'maximum-tank-level', '95.000')
+   utils.add_child(root, 'update-interval', '5')
+   dd = utils.add_child(root, 'delivery-detection')
+   utils.add_child(dd, 'relax-time', '30')
+   utils.add_child(dd, 'required-change', '1.00')
+   tanks = utils.add_child(root, 'tanks')
+
+   for t in range(8):
+      tank = utils.add_child(tanks, 'tank', attrs = {'id': f'{t}'})
+
+      utils.add_child(tank, 'name', f'Tank {t+1}')
+      utils.add_child(tank, 'alternate-name')
+      utils.add_child(tank, 'offset', '0.000')
+      utils.add_child(tank, 'shape', '0')
+      utils.add_child(tank, 'probe-type', '0')
+      utils.add_child(tank, 'enabled', 'false')
+      utils.add_child(tank, 'low-level', '5.00')
+      utils.add_child(tank, 'product-id', '-1')
+
+      dim = utils.add_child(tank, 'dimensions')
+      utils.add_child(dim, 'width', '24.000')
+      utils.add_child(dim, 'height', '24.000')
+      utils.add_child(dim, 'depth', '24.000')
+      utils.add_child(dim, 'diameter', '0.000')
+
+      triggers = utils.add_child(tank, 'triggers')
+      for r in range(3):
+         trigger = utils.add_child(triggers, 'triggers', attrs = {'id': f'{r}'})
+         utils.add_child(trigger, 'trigger-level', '0.00')
+         utils.add_child(trigger, 'direction', 'rising')
+         utils.add_child(trigger, 'text')
+         utils.add_child(trigger, 'enabled', 'false')
+         utils.add_child(trigger, 'send-when-triggered', 'false')
+         utils.add_child(trigger, 'send-when-untriggered', 'false')
+
+   return utils.save_xml(root, cfg)
+
+def make_rssh (card):
+   # And what about reverse SSH?
+   os.system(f'chmod +x {card.root_path}/etc/init.d/S90rssh')
+   os.system(f'mkdir -p {card.root_path}/root/.ssh')
+   os.system(f'scp -v all-line@192.168.1.2:/home/all-line/.ssh/id_rsa.pub {card.root_path}/root/.ssh/id_rsa.pub')
+
+   # Now make a cron entry that (re)starts ssh every hour or so
+   os.system(f'mkdir -p {card.conf_path}/cron')
+   os.system(f"echo '0 */1 * * * /etc/init.d/S90rssh check >/dev/null 2>&1' >> {card.conf_path}/cron/root")
+
+def make_managed_mode_file (data, dest):
+   cfg = f'{dest}/managed-mode.xml'
+
+   root = xml.Element('managed-mode')
+   utils.add_child(root, 'enabled', 'true')
+   utils.add_child(root, 'has-changes', 'false')
+   utils.add_child(root, 'failure-count', '0')
+   utils.add_child(root, 'maximum-failure-count', '72')
+
+   checkin = utils.add_child(root, 'check-in')
+   utils.add_child(checkin, 'url', 'http://portal.fuel-boss.com/check_in/')
+   utils.add_child(checkin, 'period', '3600')
+   utils.add_child(checkin, 'force-after', '86400')
+
+   return utils.save_xml(root, cfg)
+
+def make_permissions_file (data, dest):
+   cfg = f'{dest}/permissions.xml'
+   perms = ','.join([str(n+1) for n in range(int(data['num_products']))])
+
+   root = xml.Element('permissions')
+   utils.add_child(root, 'permissions', data = perms, attrs = {'for': '1', 'applies-to': 'group'})
+   utils.add_child(root, 'permissions', data = perms, attrs = {'for': '6144', 'applies-to': 'account'})
+   
+   return utils.save_xml(root, cfg)
+
+def make_version_file (data, dest):
+   cfg = f'{dest}/version'
+   try:
+      os.system(f"date --iso-8601=seconds > {cfg}")
+      return True
+   except:
+      log_debug('version creation error {}'.format(traceback.format_exc()))
+      return False
 
 def make_web_user_file (data, dest):
    cfg = f'{dest}/web-users.cfg'
@@ -279,11 +404,24 @@ def make_config_files (data):
    if not make_prompts_file(data, dest):
       errors.append('prompts file')
 
-   if not make_tanks_file(data, dest):
-      errors.append('tanks file')
+   if not data['portal']:
+      if not make_tanks_file(data, dest):
+         errors.append('tanks file')
 
-   if not make_deliveries_file(data, dest):
-      errors.append('empty deliveries file')
+      if not make_deliveries_file(data, dest):
+         errors.append('empty deliveries file')
+   else:
+      if not make_xml_tanks_file(data, dest):
+         errors.append('xml tanks file')
+
+      if not make_managed_mode_file(data, dest):
+         errors.append('managed-mode file')
+
+      if not make_permissions_file(data, dest):
+         errors.append('permissions file')
+
+      if not make_version_file(data, dest):
+         errors.append('version file')
 
    if not make_smtp_file(data, dest):
       errors.append('SMTP file')
@@ -533,10 +671,11 @@ def copy_program (data):
    return True
 
 def build (info):
-   crumb('Stable, Pi 2')
+   crumb(info['name'])
 
    data = {
       # Data about where things are
+      'portal': info['portal'],
       'staging_dir': info['staging_dir'],
       'dir': info['dir'],
       'buildroot_version': 'pi2',
@@ -572,7 +711,7 @@ def build (info):
          (f'Card Reader             {data["card_reader"]}', 'card_reader'),
          (f'Tank Monitor Board      {data["tank_monitor"]}', 'tank_monitor'),
          (f'Report to WEX?          {data["wex"]}', 'wex'),
-         (f'Enterprise\'s WEX?      {data["enterprise"]}', 'enterprise'),
+         (f'Enterprise\'s WEX?       {data["enterprise"]}', 'enterprise'),
          (f'Enable Test Account     {data["testing_account"]}', 'testing_account'),
          (f'System Owner            {data["owner"] if len(data["owner"]) else "(not yet set)"}', 'owner'),
          (f'Location                {data["location"] if len(data["location"]) else "(not yet set)"}', 'location'),
@@ -605,7 +744,7 @@ def build (info):
          (f'I\'m done setting this up. Proceed to build the whole unit.', 'done'),
          (f'I\'m done setting this up. Only build an SD card.', 'sd_card')]
 
-      ret = menu(items, title = 'Standard V1 Fuel Boss Configuration, Pi 2', pre_select = ret)
+      ret = menu(items, title = info['name'], pre_select = ret)
 
       if ret == 'serial':
          new_serial = text_input(
