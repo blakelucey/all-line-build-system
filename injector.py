@@ -29,11 +29,15 @@ default_fuses = {
 
 left_col = 22
 predefined = [
-   {'name': 'Single Injector', 'model': 'TM-1M1A-RT', 'id': 'single', 'serial': 'A1001576'},
-   {'name': 'Double Injector', 'model': 'TM-1M2A-RT', 'id': 'double', 'serial': 'A1001649'},
-   {'name': 'Triple Injector', 'model': 'TM-2M1A1M1A-RT', 'id': 'triple', 'serial': 'A1001635'},
-   {'name': 'Brown\'s Oil', 'model': 'TM-2M1A-RTSBDS', 'id': 'browns', 'serial': 'A1001548'},
-   {'name': 'Jugfill Only (2 Lanes)', 'model': 'BP-2A-PRESET', 'id': 'jugfill', 'serial': 'A1001652'},
+   {'name': 'Single Injector',        'model': 'TM-1M1A-RT',     'id': 'single',  'serial': 'A1001576'},
+   {'name': 'Double Injector',        'model': 'TM-1M2A-RT',     'id': 'double',  'serial': 'A1001649'},
+   {'name': 'Triple Injector',        'model': 'TM-2M1A1M1A-RT', 'id': 'triple',  'serial': 'A1001635'},
+   {'name': 'Brown\'s Oil',           'model': 'TM-2M1A-RTSBDS', 'id': 'browns',  'serial': 'A1001548'},
+   {'name': 'Jugfill Only (2 Lanes)', 'model': 'BP-2A-PRESET',   'id': 'jugfill', 'serial': 'A1001652'},
+   {'name': 'Triple Main Seq Batch',  'model': 'BP-3M1A',        'id': '3M1A',    'serial': 'A1001689'},
+   {'name': 'Three Lane Injector',    'model': 'TM-3M3A',        'id': '3M3A',    'serial': 'A1001688'},
+   {'name': 'Two Lane Injector',      'model': 'TM-2M2A',        'id': '2M2A',    'serial': 'A1001685'},
+   {'name': '4-point Transport',      'model': 'TM-2A4P',        'id': '2A4P',    'serial': 'A1001684'},
    #{'name': '4-point Transport', 'model': 'TM-1A4P', 'id': '4pt', 'serial': 'A1001567'},
    #{'name': '5-point Transport', 'model': 'TM-1A5P', 'id': '5pt', 'serial': 'A1001567'},
    #{'name': '6-point Transport', 'model': 'TM-1A6P', 'id': '6pt', 'serial': 'A1001567'},
