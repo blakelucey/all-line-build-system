@@ -585,7 +585,7 @@ def build (info):
       elif ret == 'num_products':
          new_num = menu([
             ('Single product', 1), ('2 products', 2), ('3 products', 3), ('4 products', 4),
-            ('6 products', 6), ('8 products', 8)])
+            ('5 products', 5), ('6 products', 6), ('7 products', 7), ('8 products', 8)])
 
          if new_num != -1:
             data['num_products'] = new_num

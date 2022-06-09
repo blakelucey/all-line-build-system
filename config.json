@@ -1,1 +1,1 @@
-{"port": "/dev/ttyACM0", "another": "Dingus Data", "sd_card_device": "/dev/sde", "compiler_threads": 8, "verbose": false, "compression_threads": 16, "buildroot_version": "buildroot-2021.08.13-pi2-tmp"}
+{"port": "/dev/ttyACM0", "another": "Dingus Data", "sd_card_device": "/dev/sda", "compiler_threads": 8, "verbose": false, "compression_threads": 16, "buildroot_version": "buildroot-2021.08.13-pi2-tmp"}
